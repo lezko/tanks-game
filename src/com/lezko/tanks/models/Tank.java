@@ -1,64 +1,106 @@
 package com.lezko.tanks.models;
 
-import com.lezko.tanks.enums.Direction;
+import com.lezko.tanks.game.Ammo;
+import com.lezko.tanks.game.GameObject;
 
-/**
- * Created by uleziko_t_a on 22.09.2022.
- */
-public class Tank {
+import java.util.LinkedList;
+import java.util.List;
 
-    private int x;
-    private int y;
+public class Tank extends GameObject {
 
-    private Direction direction = Direction.RIGHT;
-    private double accceleration = 1.2;
-    private int speed = 1;
-    private int maxSpeed = 30;
-    private boolean isMoving = true;
-
-    public Tank(int x, int y) {
-        this.x = x;
-        this.y = y;
+    public enum MoveDirection {
+        FORWARDS,
+        BACKWARDS
     }
 
-    public void setDirection(Direction direction) {
-        this.direction = direction;
+    public enum RotateDirection {
+        CLOCKWISE,
+        COUNTERCLOCKWISE
     }
 
-    public void move() {
-        isMoving = true;
+    private List<Ammo> ammos = new LinkedList<>();
+
+    private static double ACCELERATION = 1e-1;
+    private static int MAX_MOVING_SPEED = 2;
+
+    private MoveDirection moveDirection = MoveDirection.FORWARDS;
+    private RotateDirection rotateDirection = RotateDirection.COUNTERCLOCKWISE;
+    private int rotationSpeed = 1;
+    private boolean isRotating = false;
+
+    public Tank(int x, int y, int size) {
+        super(x, y, size);
+        setMaxMovingSpeed(MAX_MOVING_SPEED);
+        setAcceleration(ACCELERATION);
     }
 
-    public void stop() {
-        isMoving = false;
+    public void setMoveDirection(MoveDirection moveDirection) {
+        this.moveDirection = moveDirection;
     }
 
+    public void setRotating(boolean rotating) {
+        isRotating = rotating;
+    }
+
+    public RotateDirection getRotateDirection() {
+        return rotateDirection;
+    }
+
+    public void setRotateDirection(RotateDirection rotateDirection) {
+        this.rotateDirection = rotateDirection;
+    }
+
+    public void shoot() {
+        ammos.add(new Ammo(getX(), getY()));
+    }
+
+    @Override
     public void update() {
-        if (!isMoving) {
+
+
+        if (!isMoving() && !isRotating) {
+            if (getMovingSpeed() <= 0) {
+                setMovingSpeed(0);
+                return;
+            }
+            setAcceleration(-Math.abs(getAcceleration()));
+            move();
             return;
         }
 
-        switch (direction) {
-            case UP:
-                y -= speed;
-                break;
-            case DONW:
-                y += speed;
-                break;
-            case LEFT:
-                x -= speed;
-                break;
-            case RIGHT:
-                x += speed;
-                break;
+        if (isRotating) {
+            switch (rotateDirection) {
+                case CLOCKWISE:
+                    setAngle(getAngle() - rotationSpeed);
+                    if (getAngle() < 0) {
+                        setAngle(getAngle() + 360);
+                    }
+                    break;
+                case COUNTERCLOCKWISE:
+                    setAngle(getAngle() + rotationSpeed);
+                    if (getAngle() > 360) {
+                        setAngle(getAngle() % 360);
+                    }
+                    break;
+            }
+        }
+
+        if (isMoving()) {
+            setAcceleration(Math.abs(getAcceleration()));
+            move();
         }
     }
 
-    public int getX() {
-        return x;
-    }
+    private void move() {
+        int[] shift = getShift();
+        int a = shift[0], b = shift[1];
 
-    public int getY() {
-        return y;
+        if (moveDirection == MoveDirection.BACKWARDS) {
+            a = -a;
+            b = -b;
+        }
+
+        setX(getX() + a);
+        setY(getY() - b);
     }
 }
