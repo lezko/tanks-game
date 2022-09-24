@@ -1,10 +1,8 @@
-package com.lezko.tanks.models;
+package com.lezko.tanks.game;
 
 import com.lezko.tanks.game.Ammo;
+import com.lezko.tanks.game.Game;
 import com.lezko.tanks.game.GameObject;
-
-import java.util.LinkedList;
-import java.util.List;
 
 public class Tank extends GameObject {
 
@@ -18,8 +16,6 @@ public class Tank extends GameObject {
         COUNTERCLOCKWISE
     }
 
-    private List<Ammo> ammos = new LinkedList<>();
-
     private static double ACCELERATION = 1e-1;
     private static int MAX_MOVING_SPEED = 2;
 
@@ -28,8 +24,8 @@ public class Tank extends GameObject {
     private int rotationSpeed = 1;
     private boolean isRotating = false;
 
-    public Tank(int x, int y, int size) {
-        super(x, y, size);
+    public Tank(int x, int y, int size, Game game) {
+        super(x, y, size, game);
         setMaxMovingSpeed(MAX_MOVING_SPEED);
         setAcceleration(ACCELERATION);
     }
@@ -51,13 +47,11 @@ public class Tank extends GameObject {
     }
 
     public void shoot() {
-        ammos.add(new Ammo(getX(), getY()));
+        getGame().addObject(new Ammo(getX() + getSize() / 2.0, getY() + getSize() / 2.0, getAngle(), getGame()));
     }
 
     @Override
     public void update() {
-
-
         if (!isMoving() && !isRotating) {
             if (getMovingSpeed() <= 0) {
                 setMovingSpeed(0);
@@ -92,8 +86,8 @@ public class Tank extends GameObject {
     }
 
     private void move() {
-        int[] shift = getShift();
-        int a = shift[0], b = shift[1];
+        double[] shift = getShift();
+        double a = shift[0], b = shift[1];
 
         if (moveDirection == MoveDirection.BACKWARDS) {
             a = -a;
@@ -102,5 +96,10 @@ public class Tank extends GameObject {
 
         setX(getX() + a);
         setY(getY() - b);
+
+        if (!insideGameField()) {
+            setX(getX() - a);
+            setY(getY() + b);
+        }
     }
 }

@@ -1,12 +1,10 @@
 package com.lezko.tanks.controller;
 
-import com.lezko.tanks.models.Tank;
+import com.lezko.tanks.game.Tank;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.InputStream;
-import java.util.Scanner;
 
 public class TankController {
 
@@ -21,10 +19,10 @@ public class TankController {
 
         component.addKeyListener(new KeyListener() {
             void updateTank() {
-                if (!keyHolder.up && !keyHolder.down) {
+                if (!keyHolder.forwards && !keyHolder.backwards) {
                     tank.setMoving(false);
                 } else {
-                    if (keyHolder.up) {
+                    if (keyHolder.forwards) {
                         tank.setMoveDirection(Tank.MoveDirection.FORWARDS);
                     } else {
                         tank.setMoveDirection(Tank.MoveDirection.BACKWARDS);
@@ -45,10 +43,11 @@ public class TankController {
             }
 
              class KeyHolder {
-                 boolean up = false;
-                 boolean down = false;
+                 boolean forwards = false;
+                 boolean backwards = false;
                  boolean left = false;
                  boolean right = false;
+                 boolean shoot = false;
             }
 
             KeyHolder keyHolder = new KeyHolder();
@@ -63,16 +62,20 @@ public class TankController {
                 int key = keyEvent.getKeyCode();
                 switch (key) {
                     case 87:
-                        keyHolder.up = true;
+                        keyHolder.forwards = true;
                         break;
                     case 83:
-                        keyHolder.down = true;
+                        keyHolder.backwards = true;
                         break;
                     case 65:
                         keyHolder.left = true;
                         break;
                     case 68:
                         keyHolder.right = true;
+                        break;
+                    case 32:
+                        keyHolder.shoot = true;
+                        tank.shoot();
                         break;
                 }
                 updateTank();
@@ -83,16 +86,19 @@ public class TankController {
                 int key = keyEvent.getKeyCode();
                 switch (key) {
                     case 87:
-                        keyHolder.up = false;
+                        keyHolder.forwards = false;
                         break;
                     case 83:
-                        keyHolder.down = false;
+                        keyHolder.backwards = false;
                         break;
                     case 65:
                         keyHolder.left = false;
                         break;
                     case 68:
                         keyHolder.right = false;
+                        break;
+                    case 32:
+                        keyHolder.shoot = false;
                         break;
                 }
                 updateTank();

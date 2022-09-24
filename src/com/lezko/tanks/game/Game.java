@@ -1,7 +1,5 @@
 package com.lezko.tanks.game;
 
-import com.lezko.tanks.models.Tank;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
@@ -10,11 +8,11 @@ import java.util.TimerTask;
 /**
  * Created by uleziko_t_a on 22.09.2022.
  */
+
 public class Game {
 
     private Runnable callback;
-    private List<GameObject> objects = new LinkedList<>();
-    private Timer timer = new Timer();
+    private final List<GameObject> objects = new LinkedList<>();
 
     private int width;
     private int height;
@@ -23,19 +21,24 @@ public class Game {
         this.width = width;
         this.height = height;
 
+//        addTank();
         addTank();
-        addTank();
+
+        TargetGenerator generator = new TargetGenerator(200, this);
+
         Game game = this;
+        Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
+                generator.generate();
                 game.tick();
             }
         }, 0, 10);
     }
 
     public void addTank() {
-        Tank tank = new Tank(100, 100, 40);
+        Tank tank = new Tank(width / 2, height / 2, 40, this);
         objects.add(tank);
     }
 
@@ -47,16 +50,14 @@ public class Game {
         for (GameObject object : objects) {
             object.update();
         }
+        objects.removeIf(object -> object.getState() == GameObject.State.DESTROYED);
         if (callback != null) {
             callback.run();
         }
-        // debug
-//        System.out.println(tanks.get(0).getRotationAngle());
-//        log();
     }
 
-    private boolean contains(GameObject object) {
-        return object.getX() <= width && object.getY() <= height;
+    public void addObject(GameObject object) {
+        objects.add(object);
     }
 
 //    private void log() {
@@ -80,7 +81,6 @@ public class Game {
 //        }
 //        System.out.println();
 //    }
-
 
     public Runnable getCallback() {
         return callback;

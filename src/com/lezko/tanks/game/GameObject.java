@@ -1,32 +1,85 @@
 package com.lezko.tanks.game;
 
+import java.awt.*;
+
 public class GameObject {
 
-    private int x;
-    private int y;
+    public enum State {
+        ALIVE,
+        DESTROYED
+    }
+
+    private State state = State.ALIVE;
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    private Game game;
+
+    private double x;
+    private double y;
 
     private int size;
 
-    private double acceleration;
-
+    private double acceleration = 0;
     private double movingSpeed = 0;
 
-    private int maxMovingSpeed;
+    private int maxMovingSpeed = 9999;
     private int angle = 90;
     private boolean isMoving = false;
 
-    public GameObject(int x, int y, int size) {
+    public Game getGame() {
+        return game;
+    }
+
+    public void setGame(Game game) {
+        this.game = game;
+    }
+
+    public GameObject(double x, double y, int size, Game game) {
         this.x = x;
         this.y = y;
         this.size = size;
+        this.game = game;
     }
 
-    public int[] getShift() {
+    public double[] getShift() {
         movingSpeed = Math.min(movingSpeed + acceleration, maxMovingSpeed);
         double a = Math.cos(Math.toRadians(angle)) * movingSpeed;
         double b = Math.sin(Math.toRadians(angle)) * movingSpeed;
 
-        return new int[]{(int) a, (int) b};
+        return new double[]{a, b};
+    }
+
+    public void destroy() {
+        setState(State.DESTROYED);
+    }
+
+    public boolean intersect(GameObject object) {
+        double x1 = getX(), y1 = getY();
+        double x2 = x1 + getSize(), y2 = y1 + getSize();
+
+        double x3 = object.getX(), y3 = object.getY();
+        double x4 = x3 + object.getSize(), y4 = y3 + object.getSize();
+
+        if (x1 > x4 || x3 > x2) {
+            return false;
+        }
+
+        if (y2 < y3 || y4 < y1) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean insideGameField() {
+        return 0 <= getX() && getX() <= game.getWidth() - getSize() && 0 <= getY() && getY() <= game.getHeight() - getSize();
     }
 
     public double getAcceleration() {
@@ -49,19 +102,19 @@ public class GameObject {
         return size;
     }
 
-    public int getX() {
+    public double getX() {
         return x;
     }
 
-    public void setX(int x) {
+    public void setX(double x) {
         this.x = x;
     }
 
-    public int getY() {
+    public double getY() {
         return y;
     }
 
-    public void setY(int y) {
+    public void setY(double y) {
         this.y = y;
     }
 

@@ -3,16 +3,20 @@ package com.lezko.tanks.graphics;
 import com.lezko.tanks.controller.TankController;
 import com.lezko.tanks.game.Game;
 import com.lezko.tanks.game.GameObject;
-import com.lezko.tanks.models.Tank;
+import com.lezko.tanks.game.Tank;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by uleziko_t_a on 22.09.2022.
  */
 public class Frame extends JFrame {
 
-    private Game game;
+    private final Game game;
 
     public Frame() {
 
@@ -23,14 +27,14 @@ public class Frame extends JFrame {
         for (GameObject object : game.getObjects()) {
             if (object instanceof Tank) {
                 Tank tank = (Tank) object;
-                TankComponent tankComponent = new TankComponent(tank);
-                field.addTank(tankComponent);
                 TankController.initKeyboardController(this, tank);
             }
         }
 
-        game.setCallback(field::update);
+        game.setCallback(() -> field.update(game.getObjects()));
 
+        field.setOpaque(false);
+        field.setBackground(new Color(255, 0, 0, 20));
         add(field);
         pack();
 

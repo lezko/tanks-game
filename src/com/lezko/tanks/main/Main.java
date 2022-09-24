@@ -1,4 +1,4 @@
-package com.lezko.tanks.game;
+package com.lezko.tanks.main;
 
 import com.lezko.tanks.graphics.Frame;
 
