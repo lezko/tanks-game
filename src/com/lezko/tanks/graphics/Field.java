@@ -25,16 +25,18 @@ public class Field extends JPanel {
     private final int width;
     private final int height;
 
+    private JLabel scoreLabel = new JLabel();
+
     public Field(int width, int height) {
         this.width = width;
         this.height = height;
 
         setLayout(null);
         setPreferredSize(new Dimension(width, height));
+    }
 
-//        setBorder(BorderFactory.createLineBorder(Color.BLUE));
-//        setBackground(new Color(0, 0, 0, 0));
-//        setOpaque(false);
+    public void reset() {
+        gameObjectComponents.clear();
     }
 
     public void update(List<GameObject> gameObjects) {
@@ -64,6 +66,7 @@ public class Field extends JPanel {
             GameObjectComponent component = entry.getValue();
 
             if (object.getState() == GameObject.State.DESTROYED) {
+                
                 remove(component);
                 iterator.remove();
             } else {
@@ -76,13 +79,10 @@ public class Field extends JPanel {
         Toolkit.getDefaultToolkit().sync();
     }
 
-//    public void paintComponent(Graphics g) {
-//        g.setColor(getBackground());
-//        g.fillRect(0, 0, getWidth(), getHeight());
-//        super.paintComponent(g);
-////        g.setColor(new Color(0, 0, 0, 0));
-////        g.fillRect(0, 0, width, height);
-////        g.setColor(Color.blue);
-////        g.drawRect(0, 0, width, height);
-//    }
+    public void paintComponent(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setColor(Color.CYAN);
+        g2d.setStroke(new BasicStroke(5));
+        g2d.drawRect(0, 0, width, height);
+    }
 }

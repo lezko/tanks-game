@@ -11,23 +11,28 @@ import java.util.TimerTask;
 
 public class Game {
 
+    private Timer timer;
     private Runnable callback;
     private final List<GameObject> objects = new LinkedList<>();
+    private Player player;
 
     private int width;
     private int height;
 
+    public Player getPlayer() {
+        return player;
+    }
+
     public Game(int width, int height) {
         this.width = width;
         this.height = height;
+    }
 
-//        addTank();
-        addTank();
-
+    public void start() {
+        player = new Player(this);
         TargetGenerator generator = new TargetGenerator(200, this);
-
         Game game = this;
-        Timer timer = new Timer();
+        timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -37,9 +42,15 @@ public class Game {
         }, 0, 10);
     }
 
-    public void addTank() {
-        Tank tank = new Tank(width / 2, height / 2, 40, this);
-        objects.add(tank);
+    public void finish() {
+        timer.cancel();
+        timer.purge();
+        objects.clear();
+    }
+
+    public void reset() {
+        finish();
+        start();
     }
 
     public List<GameObject> getObjects() {

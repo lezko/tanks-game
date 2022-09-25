@@ -16,6 +16,8 @@ public class Tank extends GameObject {
         COUNTERCLOCKWISE
     }
 
+    private Player player;
+
     private static double ACCELERATION = 1e-1;
     private static int MAX_MOVING_SPEED = 2;
 
@@ -24,8 +26,9 @@ public class Tank extends GameObject {
     private int rotationSpeed = 1;
     private boolean isRotating = false;
 
-    public Tank(int x, int y, int size, Game game) {
+    public Tank(int x, int y, int size, Game game, Player player) {
         super(x, y, size, game);
+        this.player = player;
         setMaxMovingSpeed(MAX_MOVING_SPEED);
         setAcceleration(ACCELERATION);
     }
@@ -47,7 +50,7 @@ public class Tank extends GameObject {
     }
 
     public void shoot() {
-        getGame().addObject(new Ammo(getX() + getSize() / 2.0, getY() + getSize() / 2.0, getAngle(), getGame()));
+        getGame().addObject(new Ammo(getX() + getSize() / 2.0, getY() + getSize() / 2.0, getAngle(), getGame(), (n -> player.addScore(n))));
     }
 
     @Override

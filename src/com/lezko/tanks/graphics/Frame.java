@@ -16,26 +16,17 @@ import java.io.IOException;
  */
 public class Frame extends JFrame {
 
-    private final Game game;
+    private GameContainer gameContainer;
+    private final int WIDTH = 1000;
+    private final int HEIGHT = 800;
 
     public Frame() {
 
-        game = new Game(800, 600);
+        setPreferredSize(new Dimension(WIDTH, HEIGHT));
 
-        Field field = new Field(game.getWidth(), game.getHeight());
+        gameContainer = new GameContainer(this);
 
-        for (GameObject object : game.getObjects()) {
-            if (object instanceof Tank) {
-                Tank tank = (Tank) object;
-                TankController.initKeyboardController(this, tank);
-            }
-        }
-
-        game.setCallback(() -> field.update(game.getObjects()));
-
-        field.setOpaque(false);
-        field.setBackground(new Color(255, 0, 0, 20));
-        add(field);
+        add(gameContainer);
         pack();
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

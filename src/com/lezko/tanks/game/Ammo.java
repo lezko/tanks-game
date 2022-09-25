@@ -1,16 +1,21 @@
 package com.lezko.tanks.game;
 
+import java.util.function.Consumer;
+
 public class Ammo extends GameObject {
 
     private static final int SIZE = 10;
     private static int MOVING_SPEED = 4;
 
-    public Ammo(double x, double y, int angle, Game game) {
-        this(x, y, angle, SIZE, game);
+    private Consumer<Integer> onHit;
+
+    public Ammo(double x, double y, int angle, Game game, Consumer<Integer> onHit) {
+        this(x, y, angle, SIZE, game, onHit);
     }
 
-    public Ammo(double x, double y, int angle, int size, Game game) {
+    public Ammo(double x, double y, int angle, int size, Game game, Consumer<Integer> onHit) {
         super(x, y, size, game);
+        this.onHit = onHit;
         setState(State.ALIVE);
         setMoving(false);
         setAngle(angle);
@@ -40,6 +45,8 @@ public class Ammo extends GameObject {
                 if (intersect(target)) {
                     target.destroy();
                     destroy();
+
+                    onHit.accept(5);
                 }
             }
         }
