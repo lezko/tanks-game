@@ -36,6 +36,7 @@ public class Field extends JPanel {
     }
 
     public void reset() {
+        removeAll();
         gameObjectComponents.clear();
     }
 

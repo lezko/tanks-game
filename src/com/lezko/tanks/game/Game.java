@@ -11,6 +11,15 @@ import java.util.TimerTask;
 
 public class Game {
 
+    public enum State {
+        NOT_STARTED,
+        IN_PROGRESS,
+        PAUSED,
+        FINISHED
+    }
+
+    private State state;
+
     private Timer timer;
     private Runnable callback;
     private final List<GameObject> objects = new LinkedList<>();
@@ -26,10 +35,30 @@ public class Game {
     public Game(int width, int height) {
         this.width = width;
         this.height = height;
+
+        state = State.NOT_STARTED;
     }
 
     public void start() {
+        if (state == State.IN_PROGRESS) {
+            System.err.println("Cannot start game: its already running");
+            return;
+        }
+
         player = new Player(this);
+        initTimer();
+        state = State.IN_PROGRESS;
+    }
+
+    public void finish() {
+        timer.cancel();
+        timer.purge();
+        objects.clear();
+
+        state = State.FINISHED;
+    }
+
+    private void initTimer() {
         TargetGenerator generator = new TargetGenerator(200, this);
         Game game = this;
         timer = new Timer();
@@ -42,10 +71,21 @@ public class Game {
         }, 0, 10);
     }
 
-    public void finish() {
+    public State getState() {
+        return state;
+    }
+
+    public void pause() {
         timer.cancel();
         timer.purge();
-        objects.clear();
+
+        state = State.PAUSED;
+    }
+
+    public void resume() {
+        initTimer();
+
+        state = State.IN_PROGRESS;
     }
 
     public void reset() {

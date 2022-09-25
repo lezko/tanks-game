@@ -3,6 +3,7 @@ package com.lezko.tanks.game;
 public class Target extends GameObject {
 
     private double MOVING_SPEED = 1;
+    private final int COST = 5;
 
     public Target(int x, int y, int size, Game game) {
         super(x, y, size, game);
@@ -28,5 +29,9 @@ public class Target extends GameObject {
     public void destroy() {
         super.destroy();
         System.out.println("target destroyed");
+    }
+
+    public int getCost() {
+        return COST;
     }
 }

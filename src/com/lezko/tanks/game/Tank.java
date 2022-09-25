@@ -1,9 +1,5 @@
 package com.lezko.tanks.game;
 
-import com.lezko.tanks.game.Ammo;
-import com.lezko.tanks.game.Game;
-import com.lezko.tanks.game.GameObject;
-
 public class Tank extends GameObject {
 
     public enum MoveDirection {
@@ -25,6 +21,9 @@ public class Tank extends GameObject {
     private RotateDirection rotateDirection = RotateDirection.COUNTERCLOCKWISE;
     private int rotationSpeed = 1;
     private boolean isRotating = false;
+
+    private int COOL_DOWN = 50;
+    private int overheat = 0;
 
     public Tank(int x, int y, int size, Game game, Player player) {
         super(x, y, size, game);
@@ -50,11 +49,17 @@ public class Tank extends GameObject {
     }
 
     public void shoot() {
+        if (overheat > 0) {
+            return;
+        }
         getGame().addObject(new Ammo(getX() + getSize() / 2.0, getY() + getSize() / 2.0, getAngle(), getGame(), (n -> player.addScore(n))));
+        overheat = COOL_DOWN;
     }
 
     @Override
     public void update() {
+        overheat = Math.max(overheat - 1, 0);
+
         if (!isMoving() && !isRotating) {
             if (getMovingSpeed() <= 0) {
                 setMovingSpeed(0);

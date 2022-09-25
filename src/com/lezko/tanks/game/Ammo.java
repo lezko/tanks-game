@@ -46,7 +46,7 @@ public class Ammo extends GameObject {
                     target.destroy();
                     destroy();
 
-                    onHit.accept(5);
+                    onHit.accept(target.getCost());
                 }
             }
         }
