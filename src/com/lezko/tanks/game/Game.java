@@ -1,9 +1,6 @@
 package com.lezko.tanks.game;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 /**
  * Created by uleziko_t_a on 22.09.2022.
@@ -98,10 +95,14 @@ public class Game {
     }
 
     private void tick() {
-        for (GameObject object : objects) {
+        ListIterator<GameObject> iterator = objects.listIterator();
+        while (iterator.hasNext()) {
+            GameObject object = iterator.next();
             object.update();
+            if (object.getState() == GameObject.State.DESTROYED) {
+                iterator.remove();
+            }
         }
-        objects.removeIf(object -> object.getState() == GameObject.State.DESTROYED);
         if (callback != null) {
             callback.run();
         }

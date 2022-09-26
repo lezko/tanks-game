@@ -19,7 +19,7 @@ import java.util.TimerTask;
 public class GameContainer extends JPanel {
 
     private Image backgroundImage;
-    private Game game;
+    private final Game game;
     private Field field;
     private final JFrame frame;
     private Timer timer;
