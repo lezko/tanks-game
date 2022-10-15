@@ -4,17 +4,75 @@ import com.lezko.tanks.game.Tank;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.io.InputStream;
+import java.util.Scanner;
 
 public class TankController {
 
-    private class KeyHolder {
-        boolean forwards = false;
-        boolean backwards = false;
-        boolean left = false;
-        boolean right = false;
-        boolean shoot = false;
+    boolean forwards = false;
+    boolean backwards = false;
+    boolean left = false;
+    boolean right = false;
+    boolean shoot = false;
+
+    public void setForwards(boolean forwards) {
+        this.forwards = forwards;
     }
-    
+
+    public void setBackwards(boolean backwards) {
+        this.backwards = backwards;
+    }
+
+    public void setLeft(boolean left) {
+        this.left = left;
+    }
+
+    public void setRight(boolean right) {
+        this.right = right;
+    }
+
+    public void setShoot(boolean shoot) {
+        this.shoot = shoot;
+    }
+
+    public void reset() {
+        forwards = false;
+        backwards = false;
+        left = false;
+        right = false;
+        shoot = false;
+    }
+
+    private final Tank tank;
+
+    public void updateTank() {
+        if (!keyHolder.forwards && !keyHolder.backwards) {
+            tank.setMoving(false);
+        } else {
+            if (keyHolder.forwards) {
+                tank.setMoveDirection(Tank.MoveDirection.FORWARDS);
+            } else {
+                tank.setMoveDirection(Tank.MoveDirection.BACKWARDS);
+            }
+            tank.setMoving(true);
+        }
+
+        if (!keyHolder.left && !keyHolder.right) {
+            tank.setRotating(false);
+        } else {
+            if (keyHolder.left) {
+                tank.setRotateDirection(Tank.RotateDirection.COUNTERCLOCKWISE);
+            } else {
+                tank.setRotateDirection(Tank.RotateDirection.CLOCKWISE);
+            }
+            tank.setRotating(true);
+        }
+
+        if (keyHolder.shoot) {
+            tank.shoot();
+        }
+    }
+
     private class TankAction extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
@@ -133,11 +191,8 @@ public class TankController {
         }
     }
 
-    private final Tank tank;
-    private final KeyHolder keyHolder;
-
     public TankController(JComponent component, Tank tank) {
-        
+
         this.tank = tank;
         keyHolder = new KeyHolder();
 
@@ -170,32 +225,4 @@ public class TankController {
         component.getActionMap().put("SHOOT", new ActionShoot());
         component.getActionMap().put("RELEASED SHOOT", new ActionReleasedShoot());
     }
-
-//    public static void initIOController(InputStream in, Tank tank) {
-//        Scanner scanner = new Scanner(in);
-//        String input;
-//        while (true) {
-//            input = scanner.nextLine();
-//            switch (input) {
-//                case "u":
-//                    tank.setMoveDirection(Tank.MoveDirection.UP);
-//                    tank.setMoving(true);
-//                    break;
-//                case "d":
-//                    tank.setMoveDirection(Tank.MoveDirection.DOWN);
-//                    tank.setMoving(true);
-//                    break;
-//                case "l":
-//                    tank.setMoveDirection(Tank.MoveDirection.LEFT);
-//                    tank.setMoving(true);
-//                    break;
-//                case "r":
-//                    tank.setMoveDirection(Tank.MoveDirection.RIGHT);
-//                    tank.setMoving(true);
-//                    break;
-//                default:
-//                    tank.setMoving(false);
-//            }
-//        }
-//    }
 }
