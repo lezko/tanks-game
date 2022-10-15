@@ -1,5 +1,6 @@
 package com.lezko.tanks.graphics;
 
+import com.lezko.tanks.controller.IOTankController;
 import com.lezko.tanks.controller.TankController;
 import com.lezko.tanks.game.Game;
 import com.lezko.tanks.game.GameObject;
@@ -171,7 +172,7 @@ public class GameContainer extends JPanel {
         for (GameObject object : game.getObjects()) {
             if (object instanceof Tank) {
                 Tank tank = (Tank) object;
-                new TankController(this, tank);
+//                new TankController(this, tank);
             }
         }
 
@@ -185,6 +186,13 @@ public class GameContainer extends JPanel {
         });
 
         updateGame();
+
+        for (GameObject object : game.getObjects()) {
+            if (object instanceof Tank) {
+                Tank tank = (Tank) object;
+                new IOTankController(System.in, tank);
+            }
+        }
     }
 
     private void initGameTimer() {

@@ -10,22 +10,31 @@ public class IOTankController extends TankController {
     private Scanner scanner;
 
     public IOTankController(InputStream in, Tank tank) {
+
+        super(tank);
+
         scanner = new Scanner(in);
         String input;
         while (true) {
             input = scanner.nextLine();
             switch (input) {
                 case "w":
-                    set
+                    setForwards(true);
+                    break;
+                case "s":
+                    setBackwards(true);
+                    break;
+                case "a":
+                    setLeft(true);
                     break;
                 case "d":
+                    setRight(true);
                     break;
-                case "l":
-                    break;
-                case "r":
+                case "q":
+                    setShoot(true);
                     break;
                 default:
-                    tank.setMoving(false);
+                    reset();
             }
 
             updateTank();
