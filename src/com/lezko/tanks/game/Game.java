@@ -21,6 +21,7 @@ public class Game {
     private Runnable callback;
     private final List<GameObject> objects = new LinkedList<>();
     private Player player;
+    private Player player1;
 
     private int width;
     private int height;
@@ -43,6 +44,7 @@ public class Game {
         }
 
         player = new Player(this);
+        player1 = new Player(this);
         initTimer();
         state = State.IN_PROGRESS;
     }

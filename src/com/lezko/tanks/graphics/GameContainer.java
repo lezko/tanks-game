@@ -1,5 +1,6 @@
 package com.lezko.tanks.graphics;
 
+import com.lezko.tanks.controller.KeyboardTankController;
 import com.lezko.tanks.game.Game;
 import com.lezko.tanks.game.GameObject;
 import com.lezko.tanks.game.Tank;
@@ -102,7 +103,6 @@ public class GameContainer extends JPanel {
                 controlPanel.add(pauseButton);
                 break;
             case PAUSED:
-                System.out.println(1);
                 controlPanel.add(resumeButton);
                 break;
             case FINISHED:
@@ -166,10 +166,16 @@ public class GameContainer extends JPanel {
         gbc.gridy = 1;
         add(field, gbc);
 
+        int k = 0;
         for (GameObject object : game.getObjects()) {
             if (object instanceof Tank) {
                 Tank tank = (Tank) object;
-//                new TankController(this, tank);
+                if (k == 0) {
+                    new KeyboardTankController(tank, this);
+                } else {
+                    new KeyboardTankController(tank, this, new KeyboardTankController.KeyPreset("I", "K", "J", "L", "O"));
+                }
+                k++;
             }
         }
 
