@@ -79,7 +79,6 @@ public class TankController {
             updateTank();
         }
 
-
     }
 
     // forwards-backwards controls
