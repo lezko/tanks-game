@@ -38,7 +38,7 @@ public class GameClient implements Runnable {
     }
 
     public void sendControlsState(String state) throws IOException {
-        sendBuf = state.getBytes();
+        sendBuf = ("controls " + id + " " + state).getBytes();
         sendPacket = new DatagramPacket(sendBuf, sendBuf.length, address, port);
         socket.send(sendPacket);
     }

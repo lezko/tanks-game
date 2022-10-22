@@ -45,9 +45,15 @@ public class GameServer {
                 System.out.println("[Server] Waiting for client to connect...");
                 receivePacket = new DatagramPacket(receiveBuf, receiveBuf.length);
                 socket.receive(receivePacket);
+
+                String response = new String(receiveBuf).trim();
+                if (response.startsWith("controls")) {
+
+                }
+
                 System.out.println("[Server] Client connected");
                 ClientHandler handler = new ClientHandler(game, receivePacket.getAddress(), receivePacket.getPort());
-                pool.execute(handler);
+//                pool.execute(handler);
             }
         } catch (Exception e) {
             e.printStackTrace();
