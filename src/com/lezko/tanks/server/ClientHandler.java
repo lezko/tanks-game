@@ -1,16 +1,14 @@
 package com.lezko.tanks.server;
 
 import com.lezko.tanks.game.Game;
-import com.lezko.tanks.game.GameObject;
 import com.lezko.tanks.game.Tank;
-import com.lezko.tanks.ui.GameObjectUpdateData;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-public class ClientHandler implements Runnable {
+public class ClientHandler {
 
     private Game game;
     private Tank tank;
@@ -38,24 +36,11 @@ public class ClientHandler implements Runnable {
         socket.send(sendPacket);
     }
 
-    @Override
-    public void run() {
-        try {
-            while (true) {
-                receiveBuf = new byte[256];
-                receivePacket = new DatagramPacket(receiveBuf, receiveBuf.length);
-                String response = new String(receiveBuf).trim();
-                System.out.println(response);
-                if (response.startsWith("controls")) {
-                    updateTank(response.split(" ")[1]);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public Tank getTank() {
+        return tank;
     }
 
-    private void updateTank(String state) {
+    public void updateTank(String state) {
         boolean forwards = state.charAt(0) == '1';
         boolean backwards = state.charAt(1) == '1';
         boolean left = state.charAt(2) == '1';

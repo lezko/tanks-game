@@ -7,8 +7,6 @@ import com.lezko.tanks.ui.GameObjectUpdateData;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -37,7 +35,6 @@ public class GameServer {
             }
         });
 
-        ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(3);
         socket = new DatagramSocket(9999);
 
         try {
@@ -48,23 +45,28 @@ public class GameServer {
 
                 String response = new String(receiveBuf).trim();
                 if (response.startsWith("controls")) {
+                    String id = response.split(" ")[1];
+                    for (ClientHandler handler : handlers) {
+                        if (handler.getTank().getId().toString().equals(id)) {
+                            handler.updateTank(response.split(" ")[2]);
+                        }
+                    }
 
+                    continue;
                 }
 
                 System.out.println("[Server] Client connected");
                 ClientHandler handler = new ClientHandler(game, receivePacket.getAddress(), receivePacket.getPort());
-//                pool.execute(handler);
+                handler.send(handler.getTank().getId().toString());
+                handlers.add(handler);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        pool.shutdown();
     }
 
     private String stringifyData() {
         StringBuilder s = new StringBuilder();
-//        s.append(game.getObjects().size()).append(" ");
         for (GameObject o : game.getObjects()) {
             s.append(GameObjectUpdateData.stringify(GameObjectUpdateData.fromGameObject(o))).append(" ");
         }

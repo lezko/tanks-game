@@ -6,13 +6,12 @@ import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.util.*;
 import java.util.function.Consumer;
 
 public class GameClient implements Runnable {
 
-    private UUID id = UUID.randomUUID();
+    private UUID id;
 
     private Consumer<List<GameObjectUpdateData>> callback;
 
@@ -35,6 +34,11 @@ public class GameClient implements Runnable {
 
         sendPacket = new DatagramPacket(sendBuf, sendBuf.length, this.address, this.port);
         socket.send(sendPacket);
+
+        receivePacket = new DatagramPacket(receiveBuf, receiveBuf.length);
+        socket.receive(receivePacket);
+        String response = new String(receiveBuf).trim();
+        id = UUID.fromString(response);
     }
 
     public void sendControlsState(String state) throws IOException {

@@ -175,7 +175,6 @@ public class GameContainer extends JPanel {
         add(field, gbc);
 
         initGameTimer();
-        System.out.println(1);
         updateGame();
     }
 
