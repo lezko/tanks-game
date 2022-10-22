@@ -1,11 +1,7 @@
 package com.lezko.tanks.controller;
 
-import com.lezko.tanks.game.Tank;
-
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.io.InputStream;
-import java.util.Scanner;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TankController {
 
@@ -43,37 +39,18 @@ public class TankController {
         shoot = false;
     }
 
-    private final Tank tank;
-
-    public void updateTank() {
-        if (!forwards && !backwards) {
-            tank.setMoving(false);
-        } else {
-            if (forwards) {
-                tank.setMoveDirection(Tank.MoveDirection.FORWARDS);
-            } else {
-                tank.setMoveDirection(Tank.MoveDirection.BACKWARDS);
-            }
-            tank.setMoving(true);
-        }
-
-        if (!left && !right) {
-            tank.setRotating(false);
-        } else {
-            if (left) {
-                tank.setRotateDirection(Tank.RotateDirection.COUNTERCLOCKWISE);
-            } else {
-                tank.setRotateDirection(Tank.RotateDirection.CLOCKWISE);
-            }
-            tank.setRotating(true);
-        }
-
-        if (shoot) {
-            tank.shoot();
-        }
+    public String stringifyState() {
+        return String.valueOf(forwards ? 1 : 0) + String.valueOf(backwards ? 1 : 0) + String.valueOf(left ? 1 : 0) + String.valueOf(right ? 1 : 0) + String.valueOf(shoot ? 1 : 0);
     }
 
-    public TankController(Tank tank) {
-        this.tank = tank;
+    public Map<String, Boolean> getState() {
+        Map<String, Boolean> state = new HashMap<>();
+        state.put("forwards", forwards);
+        state.put("backwards", backwards);
+        state.put("left", left);
+        state.put("right", right);
+        state.put("shoot", shoot);
+
+        return state;
     }
 }

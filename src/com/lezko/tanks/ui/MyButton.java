@@ -1,4 +1,4 @@
-package com.lezko.tanks.graphics;
+package com.lezko.tanks.ui;
 
 import javax.swing.*;
 import java.awt.*;

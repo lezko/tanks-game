@@ -20,6 +20,8 @@ public class Ammo extends GameObject {
         setMoving(false);
         setAngle(angle);
         setMovingSpeed(MOVING_SPEED);
+
+        setType(Type.AMMO);
     }
 
     public void destroy() {

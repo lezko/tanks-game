@@ -1,4 +1,4 @@
-package com.lezko.tanks.graphics;
+package com.lezko.tanks.ui;
 
 import com.lezko.tanks.game.Ammo;
 
@@ -6,9 +6,8 @@ import java.awt.*;
 
 public class AmmoComponent extends GameObjectComponent {
 
-    public AmmoComponent(Ammo ammo) {
-        super(ammo);
-        setPreferredSize(new Dimension(ammo.getSize(), ammo.getSize()));
+    public AmmoComponent(int size) {
+        super(size);
     }
 
     public void paintComponent(Graphics g) {

@@ -30,6 +30,8 @@ public class Tank extends GameObject {
         this.player = player;
         setMaxMovingSpeed(MAX_MOVING_SPEED);
         setAcceleration(ACCELERATION);
+
+        setType(Type.TANK);
     }
 
     public void setMoveDirection(MoveDirection moveDirection) {

@@ -1,9 +1,8 @@
-package com.lezko.tanks.graphics;
+package com.lezko.tanks.ui;
 
+import com.lezko.tanks.client.GameClient;
 import com.lezko.tanks.controller.KeyboardTankController;
-import com.lezko.tanks.game.Game;
-import com.lezko.tanks.game.GameObject;
-import com.lezko.tanks.game.Tank;
+import com.lezko.tanks.controller.TankController;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -18,12 +17,14 @@ import java.util.TimerTask;
 public class GameContainer extends JPanel {
 
     private Image backgroundImage;
-    private final Game game;
     private Field field;
     private final JFrame frame;
     private Timer timer;
     private int timeRemaining;
     private int GAME_DURATION = 15;
+
+    private GameClient client;
+    private final TankController controller = new KeyboardTankController(this);
 
     private final JPanel controlPanel = new JPanel();
     private final JPanel scorePanel = new JPanel();
@@ -47,7 +48,7 @@ public class GameContainer extends JPanel {
             System.err.println(e.getMessage());
         }
 
-        game = new Game(800, 600);
+//        game = new Game(800, 600);
 
         setLayout(new GridBagLayout());
         initButtonsListeners();
@@ -59,7 +60,11 @@ public class GameContainer extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                startGame();
+                try {
+                    startGame();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
         pauseButton.addMouseListener(new MouseAdapter() {
@@ -80,7 +85,11 @@ public class GameContainer extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                startGame();
+                try {
+                    startGame();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
     }
@@ -95,20 +104,20 @@ public class GameContainer extends JPanel {
 
     private void updateControlPanel() {
         controlPanel.removeAll();
-        switch (game.getState()) {
-            case IN_PROGRESS:
-                remove(controlPanel);
-                gbc.gridy = 2;
-                add(controlPanel, gbc);
-                controlPanel.add(pauseButton);
-                break;
-            case PAUSED:
-                controlPanel.add(resumeButton);
-                break;
-            case FINISHED:
-                controlPanel.add(restartButton);
-                break;
-        }
+//        switch (game.getState()) {
+//            case IN_PROGRESS:
+//                remove(controlPanel);
+//                gbc.gridy = 2;
+//                add(controlPanel, gbc);
+//                controlPanel.add(pauseButton);
+//                break;
+//            case PAUSED:
+//                controlPanel.add(resumeButton);
+//                break;
+//            case FINISHED:
+//                controlPanel.add(restartButton);
+//                break;
+//        }
     }
 
     private void initControlPanel() {
@@ -122,21 +131,21 @@ public class GameContainer extends JPanel {
 
     private void updateScorePanel() {
         scorePanel.removeAll();
-        switch (game.getState()) {
-            case IN_PROGRESS:
-                scorePanel.add(timeLabel);
-                scorePanel.add(scoreLabel);
-
-                gbc.gridy = 0;
-                add(scorePanel, gbc);
-                break;
-            case PAUSED:
-                scorePanel.add(timeLabel);
-                scorePanel.add(scoreLabel);
-                break;
-            case FINISHED:
-                scorePanel.add(scoreLabel);
-        }
+//        switch (game.getState()) {
+//            case IN_PROGRESS:
+//                scorePanel.add(timeLabel);
+//                scorePanel.add(scoreLabel);
+//
+//                gbc.gridy = 0;
+//                add(scorePanel, gbc);
+//                break;
+//            case PAUSED:
+//                scorePanel.add(timeLabel);
+//                scorePanel.add(scoreLabel);
+//                break;
+//            case FINISHED:
+//                scorePanel.add(scoreLabel);
+//        }
     }
 
     private void initScorePanel() {
@@ -154,39 +163,19 @@ public class GameContainer extends JPanel {
         initScorePanel();
     }
 
-    private void startGame() {
+    private void startGame() throws IOException {
 
-        game.start();
+        client = new GameClient("localhost", 9999);
 
         if (field == null) {
-            field = new Field(game.getWidth(), game.getHeight());
+            field = new Field(800, 600);
         }
 
         field.setOpaque(false);
         gbc.gridy = 1;
         add(field, gbc);
 
-        int k = 0;
-        for (GameObject object : game.getObjects()) {
-            if (object instanceof Tank) {
-                Tank tank = (Tank) object;
-                if (k == 0) {
-                    new KeyboardTankController(tank, this);
-                } else {
-                    new KeyboardTankController(tank, this, new KeyboardTankController.KeyPreset("I", "K", "J", "L", "O"));
-                }
-                k++;
-            }
-        }
-
-        timeRemaining = GAME_DURATION;
         initGameTimer();
-
-        game.setCallback(() -> {
-            field.update(game.getObjects());
-            scoreLabel.setText("Score: " + game.getPlayer().getScore());
-            timeLabel.setText("Time remaining: " + timeRemaining);
-        });
 
         updateGame();
     }
@@ -196,26 +185,28 @@ public class GameContainer extends JPanel {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                timeRemaining--;
-                if (timeRemaining == 0) {
-                    finishGame();
+                try {
+                    field.update(client.fetchData());
+                    client.sendControlsState(controller.stringifyState());
+                } catch (IOException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
                 }
             }
-        }, 1000, 1000);
+        }, 0, 10);
     }
 
     private void pauseGame() {
         timer.cancel();
         timer.purge();
 
-        game.pause();
+//        game.pause();
         updateGame();
     }
 
     private void resumeGame() {
         initGameTimer();
 
-        game.resume();
+//        game.resume();
         updateGame();
     }
 
@@ -223,7 +214,7 @@ public class GameContainer extends JPanel {
         timer.cancel();
         timer.purge();
 
-        game.finish();
+//        game.finish();
 
         field.reset();
         remove(field);

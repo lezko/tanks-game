@@ -1,4 +1,4 @@
-package com.lezko.tanks.graphics;
+package com.lezko.tanks.ui;
 
 import com.lezko.tanks.game.Target;
 
@@ -6,9 +6,8 @@ import java.awt.*;
 
 public class TargetComponent extends GameObjectComponent {
 
-    public TargetComponent(Target target) {
-        super(target);
-        setPreferredSize(new Dimension(target.getSize(), target.getSize()));
+    public TargetComponent(int size) {
+        super(size);
     }
 
     public void paintComponent(Graphics g) {

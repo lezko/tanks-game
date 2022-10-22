@@ -1,6 +1,6 @@
 package com.lezko.tanks.game;
 
-import java.awt.*;
+import java.util.UUID;
 
 public class GameObject {
 
@@ -9,7 +9,16 @@ public class GameObject {
         DESTROYED
     }
 
+    public enum Type {
+        TANK,
+        AMMO,
+        TARGET
+    }
+
+    private final UUID id = UUID.randomUUID();
+
     private State state = State.ALIVE;
+    private Type type;
 
     public State getState() {
         return state;
@@ -24,7 +33,7 @@ public class GameObject {
     private double x;
     private double y;
 
-    private int size;
+    private final int size;
 
     private double acceleration = 0;
     private double movingSpeed = 0;
@@ -136,6 +145,18 @@ public class GameObject {
 
     public void setMoving(boolean moving) {
         isMoving = moving;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
     public void update() {}

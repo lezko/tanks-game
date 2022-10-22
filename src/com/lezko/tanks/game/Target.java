@@ -10,6 +10,8 @@ public class Target extends GameObject {
         setMovingSpeed(MOVING_SPEED);
         setAngle((int) (Math.random() * 360));
         setMoving(true);
+
+        setType(Type.TARGET);
     }
 
     @Override

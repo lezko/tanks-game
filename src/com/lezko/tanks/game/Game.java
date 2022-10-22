@@ -2,10 +2,6 @@ package com.lezko.tanks.game;
 
 import java.util.*;
 
-/**
- * Created by uleziko_t_a on 22.09.2022.
- */
-
 public class Game {
 
     public enum State {
@@ -20,8 +16,8 @@ public class Game {
     private Timer timer;
     private Runnable callback;
     private final List<GameObject> objects = new LinkedList<>();
+    private final List<Player> players = new ArrayList<>();
     private Player player;
-    private Player player1;
 
     private int width;
     private int height;
@@ -43,8 +39,6 @@ public class Game {
             return;
         }
 
-        player = new Player(this);
-        player1 = new Player(this);
         initTimer();
         state = State.IN_PROGRESS;
     }
@@ -114,27 +108,12 @@ public class Game {
         objects.add(object);
     }
 
-//    private void log() {
-//        int[][] field = new int[height][width];
-//        for (Tank tank : objects) {
-//            field[tank.getY()][tank.getX()] = 1;
-//        }
-//
-//        for (int i = 0; i < width; i++) {
-//            System.out.print('=');
-//        }
-//        System.out.println();
-//        for (int i = 0; i < height; i++) {
-//            for (int j = 0; j < width; j++) {
-//                System.out.print(field[i][j]);
-//            }
-//            System.out.println();
-//        }
-//        for (int i = 0; i < width; i++) {
-//            System.out.print('=');
-//        }
-//        System.out.println();
-//    }
+    public Player addPlayer() {
+        Player newPlayer = new Player(this);
+        players.add(newPlayer);
+
+        return newPlayer;
+    }
 
     public Runnable getCallback() {
         return callback;
