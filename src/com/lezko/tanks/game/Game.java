@@ -17,14 +17,9 @@ public class Game {
     private Runnable callback;
     private final List<GameObject> objects = new LinkedList<>();
     private final List<Player> players = new ArrayList<>();
-    private Player player;
 
     private int width;
     private int height;
-
-    public Player getPlayer() {
-        return player;
-    }
 
     public Game(int width, int height) {
         this.width = width;

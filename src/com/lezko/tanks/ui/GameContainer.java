@@ -20,8 +20,6 @@ public class GameContainer extends JPanel {
     private Field field;
     private final JFrame frame;
     private Timer timer;
-    private int timeRemaining;
-    private int GAME_DURATION = 15;
 
     private GameClient client;
     private final TankController controller = new KeyboardTankController(this);
@@ -47,8 +45,6 @@ public class GameContainer extends JPanel {
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }
-
-//        game = new Game(800, 600);
 
         setLayout(new GridBagLayout());
         initButtonsListeners();
@@ -165,18 +161,21 @@ public class GameContainer extends JPanel {
 
     private void startGame() throws IOException {
 
-        client = new GameClient("localhost", 9999);
-
         if (field == null) {
             field = new Field(800, 600);
         }
+
+        client = new GameClient("localhost", 9999, dataList -> {
+            field.update(dataList);
+        });
+        new Thread(client).start();
 
         field.setOpaque(false);
         gbc.gridy = 1;
         add(field, gbc);
 
         initGameTimer();
-
+        System.out.println(1);
         updateGame();
     }
 
@@ -186,9 +185,8 @@ public class GameContainer extends JPanel {
             @Override
             public void run() {
                 try {
-                    field.update(client.fetchData());
                     client.sendControlsState(controller.stringifyState());
-                } catch (IOException | ClassNotFoundException e) {
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }

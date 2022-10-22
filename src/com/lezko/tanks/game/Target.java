@@ -30,7 +30,6 @@ public class Target extends GameObject {
     @Override
     public void destroy() {
         super.destroy();
-        System.out.println("target destroyed");
     }
 
     public int getCost() {

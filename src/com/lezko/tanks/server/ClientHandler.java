@@ -5,63 +5,54 @@ import com.lezko.tanks.game.GameObject;
 import com.lezko.tanks.game.Tank;
 import com.lezko.tanks.ui.GameObjectUpdateData;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 public class ClientHandler implements Runnable {
 
     private Game game;
-    private Socket client;
     private Tank tank;
 
-    private PrintWriter out;
-    private BufferedReader in;
 
-    public ClientHandler(Game game, Socket client) throws IOException {
+    private InetAddress address;
+    private int port;
+    private final DatagramSocket socket = new DatagramSocket();
+    private DatagramPacket sendPacket, receivePacket;
+
+    private byte[] sendBuf, receiveBuf = new byte[256];
+
+    public ClientHandler(Game game, InetAddress address, int port) throws IOException {
         this.game = game;
-        this.client = client;
+        this.address = address;
+        this.port = port;
 
         tank = game.addPlayer().getTank();
 
-        out = new PrintWriter(client.getOutputStream(), true);
-        in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+    }
+
+    public void send(String data) throws IOException {
+        sendBuf = data.getBytes();
+        sendPacket = new DatagramPacket(sendBuf, sendBuf.length, address, port);
+        socket.send(sendPacket);
     }
 
     @Override
     public void run() {
         try {
             while (true) {
-                String response = in.readLine();
+                receiveBuf = new byte[256];
+                receivePacket = new DatagramPacket(receiveBuf, receiveBuf.length);
+                String response = new String(receiveBuf).trim();
+                System.out.println(response);
                 if (response.startsWith("controls")) {
                     updateTank(response.split(" ")[1]);
-                } else {
-                    out.println(stringifyData());
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        try {
-            in.close();
-            client.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        out.close();
-    }
-
-    private String stringifyData() {
-        StringBuilder s = new StringBuilder();
-        s.append(game.getObjects().size()).append(" ");
-        for (GameObject o : game.getObjects()) {
-            s.append(GameObjectUpdateData.stringify(GameObjectUpdateData.fromGameObject(o))).append(" ");
-        }
-
-        return s.toString();
     }
 
     private void updateTank(String state) {

@@ -26,7 +26,6 @@ public class Ammo extends GameObject {
 
     public void destroy() {
         super.destroy();
-        System.out.println("ammo destroyed");
     }
 
     @Override
