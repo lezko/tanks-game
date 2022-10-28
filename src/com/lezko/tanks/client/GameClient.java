@@ -1,5 +1,7 @@
 package com.lezko.tanks.client;
 
+import com.lezko.tanks.net.UDPReceiver;
+import com.lezko.tanks.net.UDPSender;
 import com.lezko.tanks.ui.GameObjectUpdateData;
 
 import java.io.*;
@@ -13,38 +15,29 @@ public class GameClient implements Runnable {
 
     private UUID id;
 
+    private UDPSender sender;
+    private UDPReceiver receiver;
+
     private Consumer<List<GameObjectUpdateData>> callback;
 
     private Scanner scanner;
     private StringBuilder sb;
 
-    private final InetAddress address;
-    private final int port;
-
-    private final DatagramSocket socket = new DatagramSocket();
-    private DatagramPacket sendPacket, receivePacket;
-
     private byte[] sendBuf = new byte[256], receiveBuf = new byte[256];
 
     public GameClient(String address, int port, Consumer<List<GameObjectUpdateData>> callback) throws IOException {
-        this.address = InetAddress.getByName(address);
-        this.port = port;
-
+        sender = new UDPSender(InetAddress.getByName(address), port);
         this.callback = callback;
 
-        sendPacket = new DatagramPacket(sendBuf, sendBuf.length, this.address, this.port);
-        socket.send(sendPacket);
+        sender.send("create");
 
-        receivePacket = new DatagramPacket(receiveBuf, receiveBuf.length);
-        socket.receive(receivePacket);
-        String response = new String(receiveBuf).trim();
+        String response = receiver.getLine();
         id = UUID.fromString(response);
+        System.out.println(id);
     }
 
     public void sendControlsState(String state) throws IOException {
-        sendBuf = ("controls " + id + " " + state).getBytes();
-        sendPacket = new DatagramPacket(sendBuf, sendBuf.length, address, port);
-        socket.send(sendPacket);
+        sender.send("controls " + id + " " + state);
     }
 
     public List<GameObjectUpdateData> parseData(String data) {
@@ -67,20 +60,20 @@ public class GameClient implements Runnable {
 
     @Override
     public void run() {
-        try {
-            while (true) {
-                receiveBuf = new byte[1024];
-                receivePacket = new DatagramPacket(receiveBuf, receiveBuf.length);
-                socket.receive(receivePacket);
-
-                receiveBuf = new byte[receivePacket.getLength()];
-                System.arraycopy(receivePacket.getData(), receivePacket.getOffset(), receiveBuf, 0, receivePacket.getLength());
-
-                String str = new String(receiveBuf);
-                callback.accept(parseData(str));
-            }
-        } catch (RuntimeException | IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            while (true) {
+//                receiveBuf = new byte[1024];
+//                receivePacket = new DatagramPacket(receiveBuf, receiveBuf.length);
+//                socket.receive(receivePacket);
+//
+//                receiveBuf = new byte[receivePacket.getLength()];
+//                System.arraycopy(receivePacket.getData(), receivePacket.getOffset(), receiveBuf, 0, receivePacket.getLength());
+//
+//                String str = new String(receiveBuf);
+//                callback.accept(parseData(str));
+//            }
+//        } catch (RuntimeException | IOException e) {
+//            e.printStackTrace();
+//        }
     }
 }

@@ -6,8 +6,11 @@ import com.lezko.tanks.net.UDPSender;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.UUID;
 
 public class ClientHandler {
+
+    private final UUID id = UUID.randomUUID();
 
     private Game game;
     private Tank tank;
@@ -26,6 +29,10 @@ public class ClientHandler {
 
     public Tank getTank() {
         return tank;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     // todo move method inside Tank class

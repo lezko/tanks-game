@@ -100,20 +100,6 @@ public class GameContainer extends JPanel {
 
     private void updateControlPanel() {
         controlPanel.removeAll();
-//        switch (game.getState()) {
-//            case IN_PROGRESS:
-//                remove(controlPanel);
-//                gbc.gridy = 2;
-//                add(controlPanel, gbc);
-//                controlPanel.add(pauseButton);
-//                break;
-//            case PAUSED:
-//                controlPanel.add(resumeButton);
-//                break;
-//            case FINISHED:
-//                controlPanel.add(restartButton);
-//                break;
-//        }
     }
 
     private void initControlPanel() {
@@ -127,21 +113,6 @@ public class GameContainer extends JPanel {
 
     private void updateScorePanel() {
         scorePanel.removeAll();
-//        switch (game.getState()) {
-//            case IN_PROGRESS:
-//                scorePanel.add(timeLabel);
-//                scorePanel.add(scoreLabel);
-//
-//                gbc.gridy = 0;
-//                add(scorePanel, gbc);
-//                break;
-//            case PAUSED:
-//                scorePanel.add(timeLabel);
-//                scorePanel.add(scoreLabel);
-//                break;
-//            case FINISHED:
-//                scorePanel.add(scoreLabel);
-//        }
     }
 
     private void initScorePanel() {
@@ -168,7 +139,7 @@ public class GameContainer extends JPanel {
         client = new GameClient("localhost", 9999, dataList -> {
             field.update(dataList);
         });
-        new Thread(client).start();
+//        new Thread(client).start();
 
         field.setOpaque(false);
         gbc.gridy = 1;
