@@ -2,24 +2,20 @@ package com.lezko.tanks.server;
 
 import com.lezko.tanks.game.Game;
 import com.lezko.tanks.game.GameObject;
+import com.lezko.tanks.net.UDPReceiver;
 import com.lezko.tanks.ui.GameObjectUpdateData;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.*;
 
 public class GameServer {
 
     private Game game;
+    private UDPReceiver receiver;
 
-    private DatagramSocket socket;
-    private DatagramPacket sendPacket, receivePacket;
-    private byte[] sendBuf, receiveBuf = new byte[256];
+    private final Map<UUID, GameSession> sessions = new HashMap<>();
 
+    // todo use map to store active connections
     private final List<ClientHandler> handlers = new ArrayList<>();
 
     public GameServer() throws IOException {
@@ -35,15 +31,14 @@ public class GameServer {
             }
         });
 
-        socket = new DatagramSocket(9999);
+        receiver = new UDPReceiver(9999);
 
         try {
             while (true) {
                 System.out.println("[Server] Waiting for client to connect...");
-                receivePacket = new DatagramPacket(receiveBuf, receiveBuf.length);
-                socket.receive(receivePacket);
 
-                String response = new String(receiveBuf).trim();
+                // todo make handlers for each request
+                String response = receiver.getLine();
                 if (response.startsWith("controls")) {
                     String id = response.split(" ")[1];
                     for (ClientHandler handler : handlers) {
@@ -56,7 +51,7 @@ public class GameServer {
                 }
 
                 System.out.println("[Server] Client connected");
-                ClientHandler handler = new ClientHandler(game, receivePacket.getAddress(), receivePacket.getPort());
+                ClientHandler handler = new ClientHandler(game, receiver.getAddress(), receiver.getPort());
                 handler.send(handler.getTank().getId().toString());
                 handlers.add(handler);
             }
@@ -65,6 +60,7 @@ public class GameServer {
         }
     }
 
+    // todo optimize data collection
     private String stringifyData() {
         StringBuilder s = new StringBuilder();
         for (GameObject o : game.getObjects()) {

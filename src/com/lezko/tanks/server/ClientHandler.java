@@ -2,10 +2,9 @@ package com.lezko.tanks.server;
 
 import com.lezko.tanks.game.Game;
 import com.lezko.tanks.game.Tank;
+import com.lezko.tanks.net.UDPSender;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 public class ClientHandler {
@@ -13,34 +12,25 @@ public class ClientHandler {
     private Game game;
     private Tank tank;
 
-
-    private InetAddress address;
-    private int port;
-    private final DatagramSocket socket = new DatagramSocket();
-    private DatagramPacket sendPacket, receivePacket;
-
-    private byte[] sendBuf, receiveBuf = new byte[256];
+    private UDPSender sender;
 
     public ClientHandler(Game game, InetAddress address, int port) throws IOException {
         this.game = game;
-        this.address = address;
-        this.port = port;
-
+        sender = new UDPSender(address, port);
         tank = game.addPlayer().getTank();
-
     }
 
     public void send(String data) throws IOException {
-        sendBuf = data.getBytes();
-        sendPacket = new DatagramPacket(sendBuf, sendBuf.length, address, port);
-        socket.send(sendPacket);
+        sender.send(data);
     }
 
     public Tank getTank() {
         return tank;
     }
 
+    // todo move method inside Tank class
     public void updateTank(String state) {
+        // todo make "update controls" object
         boolean forwards = state.charAt(0) == '1';
         boolean backwards = state.charAt(1) == '1';
         boolean left = state.charAt(2) == '1';
