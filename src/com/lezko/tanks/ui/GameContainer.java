@@ -8,11 +8,13 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
-import java.util.Timer;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
+import java.util.List;
 
 public class GameContainer extends JPanel {
 
@@ -35,118 +37,81 @@ public class GameContainer extends JPanel {
     private final MyButton resumeButton = new MyButton("Resume game");
     private final MyButton restartButton = new MyButton("Restart game");
 
-    private GridBagConstraints gbc = new GridBagConstraints();
+    private final MyButton createLobbyBtn = new MyButton("Create lobby");
 
-    public GameContainer(JFrame frame) {
+    private JPanel lobbyContainer;
+
+    public GameContainer(JFrame frame) throws IOException {
         this.frame = frame;
 
         try {
             backgroundImage = ImageIO.read(new File("img/space-background.jpeg"));
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            e.printStackTrace();
         }
 
-        setLayout(new GridBagLayout());
-        initButtonsListeners();
-        initGame();
-    }
-
-    private void initButtonsListeners() {
-        startButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                try {
-                    startGame();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
-        pauseButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                pauseGame();
-            }
-        });
-        resumeButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                resumeGame();
-            }
-        });
-        restartButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                try {
-                    startGame();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
-    }
-
-    private void updateGame() {
-        updateControlPanel();
-        updateScorePanel();
-
-        revalidate();
-        repaint();
-    }
-
-    private void updateControlPanel() {
-        controlPanel.removeAll();
-    }
-
-    private void initControlPanel() {
-        controlPanel.add(startButton);
-
-        controlPanel.setOpaque(false);
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        add(controlPanel, gbc);
-    }
-
-    private void updateScorePanel() {
-        scorePanel.removeAll();
-    }
-
-    private void initScorePanel() {
-        scorePanel.setOpaque(false);
-
-        timeLabel.setForeground(Color.CYAN);
-        scoreLabel.setForeground(Color.CYAN);
-
-        scorePanel.add(timeLabel);
-        scorePanel.add(scoreLabel);
-    }
-
-    private void initGame() {
-        initControlPanel();
-        initScorePanel();
-    }
-
-    private void startGame() throws IOException {
-
-        if (field == null) {
-            field = new Field(800, 600);
-        }
-
+        initField();
         client = new GameClient("localhost", 9999, dataList -> {
             field.update(dataList);
         });
-        new Thread(client).start();
 
+        createLobbyBtn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                try {
+                    client.createSession();
+                    showLobbyList();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+        add(createLobbyBtn);
+        initLobbyContainer();
+        showLobbyList();
+    }
+
+    private void showLobbyList() throws IOException {
+        lobbyContainer.removeAll();
+
+        List<UUID> sessionIds = client.getSessions();
+        for (UUID id : sessionIds) {
+            lobbyContainer.add(new LobbyItem(id, () -> {
+                try {
+                    joinSession(id);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }));
+        }
+
+        revalidate();
+    }
+
+    private void joinSession(UUID sessionId) throws IOException {
+        lobbyContainer.setVisible(false);
+        client.joinSession(sessionId);
+        startGame();
+    }
+
+    private void initLobbyContainer() {
+        lobbyContainer = new JPanel();
+        lobbyContainer.setOpaque(false);
+        lobbyContainer.setLayout(new FlowLayout());
+        add(lobbyContainer);
+    }
+
+    private void initField() {
+        field = new Field(800, 600);
         field.setOpaque(false);
-        gbc.gridy = 1;
-        add(field, gbc);
+        field.setVisible(false);
+        add(field);
+    }
 
+    private void startGame() {
+        client.startListening();
+        field.setVisible(true);
         initGameTimer();
-        updateGame();
     }
 
     private void initGameTimer() {
@@ -161,33 +126,6 @@ public class GameContainer extends JPanel {
                 }
             }
         }, 0, 10);
-    }
-
-    private void pauseGame() {
-        timer.cancel();
-        timer.purge();
-
-//        game.pause();
-        updateGame();
-    }
-
-    private void resumeGame() {
-        initGameTimer();
-
-//        game.resume();
-        updateGame();
-    }
-
-    private void finishGame() {
-        timer.cancel();
-        timer.purge();
-
-//        game.finish();
-
-        field.reset();
-        remove(field);
-
-        updateGame();
     }
 
     public void paintComponent(Graphics g) {

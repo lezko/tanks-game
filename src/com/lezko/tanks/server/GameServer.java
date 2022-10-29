@@ -4,8 +4,9 @@ import com.lezko.tanks.net.UDPReceiver;
 import com.lezko.tanks.net.UDPSender;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.CountDownLatch;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class GameServer {
 
@@ -24,26 +25,30 @@ public class GameServer {
                 String response = receiver.getLine();
                 String[] arr = response.split(" ");
 
-                if (response.startsWith("controls")) {
+                if (response.startsWith("sessions")) {
+                    StringBuilder sb = new StringBuilder();
+                    for (GameSession session : sessions.values()) {
+                        sb.append(session.getId()).append(" ");
+                    }
+                    new UDPSender(receiver.getAddress(), receiver.getPort()).send(sb.toString());
+                } else if (response.startsWith("controls")) {
                     UUID sessionId = UUID.fromString(arr[1]);
                     UUID clientId = UUID.fromString(arr[2]);
                     sessions.get(sessionId).updatePlayer(clientId, arr[3]);
                 } else if (response.startsWith("join")) {
                     UUID sessionId = UUID.fromString(arr[1]);
-                    sessions.get(sessionId).addClient(receiver.getAddress(), receiver.getPort());
+                    UUID newClientId = sessions.get(sessionId).addClient(receiver.getAddress(), receiver.getPort());
+                    new UDPSender(receiver.getAddress(), receiver.getPort()).send(newClientId.toString());
                 } else if (response.startsWith("create")) {
                     UDPSender sender = new UDPSender(receiver.getAddress(), receiver.getPort());
                     if (sessions.size() == SESSION_LIMIT) {
                         sender.send("Sessions limit exceed");
                     } else {
-                        CountDownLatch latch = new CountDownLatch(1);
-                        GameSession newSession = new GameSession(latch);
+                        GameSession newSession = new GameSession();
                         sessions.put(newSession.getId(), newSession);
                         new Thread(newSession).start();
-                        latch.await();
 
-                        UUID clientId = newSession.addClient(receiver.getAddress(), receiver.getPort());
-                        sender.send(newSession.getId().toString() + " " +  clientId.toString());
+                        sender.send(newSession.getId().toString());
                         System.out.println("created session " + newSession.getId());
                     }
                 }

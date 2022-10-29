@@ -41,13 +41,7 @@ public class Field extends JPanel {
 
             if (gameObjectComponents.containsKey(id)) {
                 GameObjectComponent component = gameObjectComponents.get(id);
-
-                if (data.getState() == GameObject.State.DESTROYED) {
-                    remove(component);
-                    gameObjectComponents.remove(id);
-                } else {
-                    component.update(data);
-                }
+                component.update(data);
             } else {
                 GameObjectComponent component = null;
 

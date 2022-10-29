@@ -2,6 +2,7 @@ package com.lezko.tanks.ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class GameUI extends JFrame {
 
@@ -9,7 +10,7 @@ public class GameUI extends JFrame {
     private final int WIDTH = 1000;
     private final int HEIGHT = 800;
 
-    public GameUI() {
+    public GameUI() throws IOException {
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
 
         gameContainer = new GameContainer(this);
@@ -22,7 +23,7 @@ public class GameUI extends JFrame {
         setVisible(true);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         new GameUI();
     }
 }

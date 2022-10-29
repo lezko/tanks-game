@@ -20,18 +20,15 @@ public class GameSession implements Runnable {
     private Game game;
     private final Map<UUID, ClientHandler> clients = new HashMap<>();
 
-    private CountDownLatch latch;
+    private final CountDownLatch latch = new CountDownLatch(1);
 
-    public GameSession(CountDownLatch latch) {
-        this.latch = latch;
-    }
-
-    public UUID addClient(InetAddress address, int port) throws IOException {
+    public UUID addClient(InetAddress address, int port) throws IOException, InterruptedException {
         if (clients.size() == CLIENT_LIMIT) {
             new UDPSender(address, port).send("Players limit exceed");
             return null;
         }
 
+        latch.await();
         ClientHandler handler = new ClientHandler(game, address, port);
         clients.put(handler.getId(), handler);
         return handler.getId();
@@ -50,7 +47,7 @@ public class GameSession implements Runnable {
                 try {
                     client.send(stringifyData());
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 }
             }
         });
