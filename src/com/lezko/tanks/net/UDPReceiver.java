@@ -18,6 +18,10 @@ public class UDPReceiver {
         socket = new DatagramSocket(port);
     }
 
+    public UDPReceiver(DatagramSocket socket) throws SocketException {
+        this.socket = socket;
+    }
+
     public String getLine() throws IOException {
         DatagramPacket packet = new DatagramPacket(buff, buff.length);
         socket.receive(packet);
@@ -37,5 +41,9 @@ public class UDPReceiver {
 
     public int getPort() {
         return port;
+    }
+
+    public DatagramSocket getSocket() {
+        return socket;
     }
 }

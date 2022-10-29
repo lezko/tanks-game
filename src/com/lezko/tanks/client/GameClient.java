@@ -13,7 +13,8 @@ import java.util.function.Consumer;
 
 public class GameClient implements Runnable {
 
-    private UUID id;
+    private final UUID id;
+    private final UUID serverSessionId;
 
     private UDPSender sender;
     private UDPReceiver receiver;
@@ -23,21 +24,21 @@ public class GameClient implements Runnable {
     private Scanner scanner;
     private StringBuilder sb;
 
-    private byte[] sendBuf = new byte[256], receiveBuf = new byte[256];
-
     public GameClient(String address, int port, Consumer<List<GameObjectUpdateData>> callback) throws IOException {
         sender = new UDPSender(InetAddress.getByName(address), port);
+        receiver = new UDPReceiver(sender.getSocket());
         this.callback = callback;
 
         sender.send("create");
 
         String response = receiver.getLine();
-        id = UUID.fromString(response);
-        System.out.println(id);
+        String[] arr = response.split(" ");
+        serverSessionId = UUID.fromString(arr[0]);
+        id = UUID.fromString(arr[1]);
     }
 
     public void sendControlsState(String state) throws IOException {
-        sender.send("controls " + id + " " + state);
+        sender.send("controls " + serverSessionId + " " + id + " " + state);
     }
 
     public List<GameObjectUpdateData> parseData(String data) {
@@ -60,20 +61,13 @@ public class GameClient implements Runnable {
 
     @Override
     public void run() {
-//        try {
-//            while (true) {
-//                receiveBuf = new byte[1024];
-//                receivePacket = new DatagramPacket(receiveBuf, receiveBuf.length);
-//                socket.receive(receivePacket);
-//
-//                receiveBuf = new byte[receivePacket.getLength()];
-//                System.arraycopy(receivePacket.getData(), receivePacket.getOffset(), receiveBuf, 0, receivePacket.getLength());
-//
-//                String str = new String(receiveBuf);
-//                callback.accept(parseData(str));
-//            }
-//        } catch (RuntimeException | IOException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            while (true) {
+                String str = receiver.getLine();
+                callback.accept(parseData(str));
+            }
+        } catch (RuntimeException | IOException e) {
+            e.printStackTrace();
+        }
     }
 }

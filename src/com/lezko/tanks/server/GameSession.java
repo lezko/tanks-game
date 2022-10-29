@@ -10,6 +10,7 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
 public class GameSession implements Runnable {
 
@@ -19,14 +20,21 @@ public class GameSession implements Runnable {
     private Game game;
     private final Map<UUID, ClientHandler> clients = new HashMap<>();
 
-    public void addClient(InetAddress address, int port) throws IOException {
+    private CountDownLatch latch;
+
+    public GameSession(CountDownLatch latch) {
+        this.latch = latch;
+    }
+
+    public UUID addClient(InetAddress address, int port) throws IOException {
         if (clients.size() == CLIENT_LIMIT) {
             new UDPSender(address, port).send("Players limit exceed");
-            return;
+            return null;
         }
 
         ClientHandler handler = new ClientHandler(game, address, port);
         clients.put(handler.getId(), handler);
+        return handler.getId();
     }
 
     public void updatePlayer(UUID clientId, String data) {
@@ -46,6 +54,8 @@ public class GameSession implements Runnable {
                 }
             }
         });
+
+        latch.countDown();
     }
 
     // todo optimize data collection

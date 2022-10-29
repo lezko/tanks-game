@@ -5,6 +5,7 @@ import com.lezko.tanks.net.UDPSender;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 
 public class GameServer {
 
@@ -35,11 +36,14 @@ public class GameServer {
                     if (sessions.size() == SESSION_LIMIT) {
                         sender.send("Sessions limit exceed");
                     } else {
-                        GameSession newSession = new GameSession();
+                        CountDownLatch latch = new CountDownLatch(1);
+                        GameSession newSession = new GameSession(latch);
                         sessions.put(newSession.getId(), newSession);
-                        newSession.addClient(receiver.getAddress(), receiver.getPort());
+                        new Thread(newSession).start();
+                        latch.await();
 
-                        sender.send(newSession.getId().toString());
+                        UUID clientId = newSession.addClient(receiver.getAddress(), receiver.getPort());
+                        sender.send(newSession.getId().toString() + " " +  clientId.toString());
                         System.out.println("created session " + newSession.getId());
                     }
                 }

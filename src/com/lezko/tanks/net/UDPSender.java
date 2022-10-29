@@ -23,4 +23,8 @@ public class UDPSender {
         DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
         socket.send(packet);
     }
+
+    public DatagramSocket getSocket() {
+        return socket;
+    }
 }

@@ -139,7 +139,7 @@ public class GameContainer extends JPanel {
         client = new GameClient("localhost", 9999, dataList -> {
             field.update(dataList);
         });
-//        new Thread(client).start();
+        new Thread(client).start();
 
         field.setOpaque(false);
         gbc.gridy = 1;
