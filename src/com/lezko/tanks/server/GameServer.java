@@ -28,7 +28,7 @@ public class GameServer {
                 if (response.startsWith("sessions")) {
                     StringBuilder sb = new StringBuilder();
                     for (GameSession session : sessions.values()) {
-                        sb.append(session.getId()).append(" ");
+                        sb.append(session.getId()).append(" ").append(session.getPlayersCount()).append("|");
                     }
                     new UDPSender(receiver.getAddress(), receiver.getPort()).send(sb.toString());
                 } else if (response.startsWith("controls")) {

@@ -55,6 +55,10 @@ public class GameSession implements Runnable {
         latch.countDown();
     }
 
+    public int getPlayersCount() {
+        return clients.size();
+    }
+
     // todo optimize data collection
     private String stringifyData() {
         StringBuilder s = new StringBuilder();

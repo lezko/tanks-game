@@ -40,7 +40,13 @@ public class TankController {
     }
 
     public String stringifyState() {
-        return String.valueOf(forwards ? 1 : 0) + String.valueOf(backwards ? 1 : 0) + String.valueOf(left ? 1 : 0) + String.valueOf(right ? 1 : 0) + String.valueOf(shoot ? 1 : 0);
+        return
+            String.valueOf(forwards ? 1 : 0)
+            + String.valueOf(backwards ? 1 : 0)
+            + String.valueOf(left ? 1 : 0)
+            + String.valueOf(right ? 1 : 0)
+            + String.valueOf(shoot ? 1 : 0)
+            ;
     }
 
     public Map<String, Boolean> getState() {

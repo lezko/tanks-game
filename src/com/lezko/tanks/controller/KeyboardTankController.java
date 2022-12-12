@@ -1,7 +1,5 @@
 package com.lezko.tanks.controller;
 
-import com.lezko.tanks.game.Tank;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.UUID;
@@ -107,92 +105,76 @@ public class KeyboardTankController extends TankController {
         component.getActionMap().put("RELEASED SHOOT" + id, new ActionReleasedShoot());
     }
 
-    private class TankAction extends AbstractAction {
-        @Override
-        public void actionPerformed(ActionEvent actionEvent) {
-        }
-    }
-
 //     forwards-backwards controls
-    private class ActionForwards extends TankAction {
+    private class ActionForwards extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             setForwards(true);
-            super.actionPerformed(actionEvent);
         }
     }
 
-    private class ActionReleasedForwards extends TankAction {
+    private class ActionReleasedForwards extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             setForwards(false);
-            super.actionPerformed(actionEvent);
         }
     }
 
-    private class ActionBackwards extends TankAction {
+    private class ActionBackwards extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             setBackwards(true);
-            super.actionPerformed(actionEvent);
         }
     }
 
-    private class ActionReleasedBackwards extends TankAction {
+    private class ActionReleasedBackwards extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             setBackwards(false);
-            super.actionPerformed(actionEvent);
         }
     }
 
 //     left-right controls
-    private class ActionLeft extends TankAction {
+    private class ActionLeft extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             setLeft(true);
-            super.actionPerformed(actionEvent);
         }
     }
 
-    private class ActionReleasedLeft extends TankAction {
+    private class ActionReleasedLeft extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             setLeft(false);
-            super.actionPerformed(actionEvent);
         }
     }
 
-    private class ActionRight extends TankAction {
+    private class ActionRight extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             setRight(true);
-            super.actionPerformed(actionEvent);
         }
     }
 
-    private class ActionReleasedRight extends TankAction {
+    private class ActionReleasedRight extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             setRight(false);
-            super.actionPerformed(actionEvent);
         }
     }
 
 //     shoot controls
-    private class ActionShoot extends TankAction {
+    private class ActionShoot extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             setShoot(true);
-            super.actionPerformed(actionEvent);
         }
     }
 
-    private class ActionReleasedShoot extends TankAction {
+    private class ActionReleasedShoot extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             setShoot(false);
-            super.actionPerformed(actionEvent);
         }
     }
 }

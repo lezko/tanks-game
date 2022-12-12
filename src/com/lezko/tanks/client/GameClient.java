@@ -30,14 +30,16 @@ public class GameClient {
         this.callback = callback;
     }
 
-    public List<UUID> getSessions() throws IOException {
+    public Map<UUID, Integer> getSessions() throws IOException {
         sender.send("sessions");
-        List<UUID> result = new ArrayList<>();
-        for (String str : receiver.getLine().split(" ")) {
+        Map<UUID, Integer> result = new HashMap<>();
+        String line = receiver.getLine();
+        for (String str : line.split("\\|")) {
             if (str.trim().equals("")) {
                 break;
             }
-            result.add(UUID.fromString(str));
+            String[] split = str.split(" ");
+            result.put(UUID.fromString(split[0]), Integer.parseInt(split[1]));
         }
 
         return result;

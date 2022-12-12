@@ -11,10 +11,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
+import java.util.*;
 import java.util.List;
+import java.util.Timer;
 
 public class GameContainer extends JPanel {
 
@@ -36,6 +35,7 @@ public class GameContainer extends JPanel {
     private final MyButton pauseButton = new MyButton("Pause game");
     private final MyButton resumeButton = new MyButton("Resume game");
     private final MyButton restartButton = new MyButton("Restart game");
+    private final MyButton exitLobbyButton = new MyButton("Exit lobby");
 
     private final MyButton createLobbyBtn = new MyButton("Create lobby");
 
@@ -66,19 +66,25 @@ public class GameContainer extends JPanel {
                 }
             }
         });
-        add(createLobbyBtn);
+
+        setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         initLobbyContainer();
+
+        add(new Box.Filler(new Dimension(0, 0), new Dimension(0, Short.MAX_VALUE), new Dimension(0, Short.MAX_VALUE)));
+
+        createLobbyBtn.setAlignmentX(CENTER_ALIGNMENT);
+        add(createLobbyBtn);
         showLobbyList();
     }
 
     private void showLobbyList() throws IOException {
         lobbyContainer.removeAll();
 
-        List<UUID> sessionIds = client.getSessions();
-        for (UUID id : sessionIds) {
-            lobbyContainer.add(new LobbyItem(id, () -> {
+        Map<UUID, Integer> sessions = client.getSessions();
+        for (Map.Entry<UUID, Integer> entry : sessions.entrySet()) {
+            lobbyContainer.add(new LobbyItem(entry.getKey(), entry.getValue(), () -> {
                 try {
-                    joinSession(id);
+                    joinSession(entry.getKey());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -97,7 +103,8 @@ public class GameContainer extends JPanel {
     private void initLobbyContainer() {
         lobbyContainer = new JPanel();
         lobbyContainer.setOpaque(false);
-        lobbyContainer.setLayout(new FlowLayout());
+        lobbyContainer.setLayout(new BoxLayout(lobbyContainer, BoxLayout.PAGE_AXIS));
+        lobbyContainer.setAlignmentX(CENTER_ALIGNMENT);
         add(lobbyContainer);
     }
 

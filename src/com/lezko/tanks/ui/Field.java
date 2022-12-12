@@ -22,6 +22,7 @@ public class Field extends JPanel {
 
         setLayout(null);
         setPreferredSize(new Dimension(width, height));
+        setMinimumSize(new Dimension(width, height));
     }
 
     public void reset() {

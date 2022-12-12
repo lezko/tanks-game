@@ -8,10 +8,16 @@ import java.util.UUID;
 
 public class LobbyItem extends JPanel {
 
-    public LobbyItem(UUID id, Runnable callback) {
-        JLabel idLabel = new JLabel(id.toString());
+    private final UUID sessionId;
+
+    public LobbyItem(UUID id, int playersCount, Runnable callback) {
+        sessionId = id;
+
+        setLayout(new BorderLayout());
+
+        JLabel idLabel = new JLabel(id.toString() + ", " + "Players: " + playersCount);
         idLabel.setForeground(Color.white);
-        add(idLabel);
+        add(idLabel, BorderLayout.LINE_START);
 
         MyButton enterBtn = new MyButton("JOIN", 10);
         enterBtn.addMouseListener(new MouseAdapter() {
@@ -20,7 +26,7 @@ public class LobbyItem extends JPanel {
                 callback.run();
             }
         });
-        add(enterBtn);
+        add(enterBtn, BorderLayout.LINE_END);
 
         setBorder(BorderFactory.createLineBorder(Color.CYAN, 3));
         setBackground(new Color(0, 0, 0, 0));
