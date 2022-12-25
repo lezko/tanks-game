@@ -110,6 +110,10 @@ public class Game {
         return newPlayer;
     }
 
+    public void removePlayer(Player player) {
+        players.remove(player);
+    }
+
     public Runnable getCallback() {
         return callback;
     }

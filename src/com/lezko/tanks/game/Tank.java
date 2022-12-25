@@ -95,6 +95,40 @@ public class Tank extends GameObject {
         }
     }
 
+    public void update(String state) {
+        boolean forwards = state.charAt(0) == '1';
+        boolean backwards = state.charAt(1) == '1';
+        boolean left = state.charAt(2) == '1';
+        boolean right = state.charAt(3) == '1';
+        boolean shoot = state.charAt(4) == '1';
+
+        if (!forwards && !backwards) {
+            setMoving(false);
+        } else {
+            if (forwards) {
+                setMoveDirection(Tank.MoveDirection.FORWARDS);
+            } else {
+                setMoveDirection(Tank.MoveDirection.BACKWARDS);
+            }
+            setMoving(true);
+        }
+
+        if (!left && !right) {
+            setRotating(false);
+        } else {
+            if (left) {
+                setRotateDirection(Tank.RotateDirection.COUNTERCLOCKWISE);
+            } else {
+                setRotateDirection(Tank.RotateDirection.CLOCKWISE);
+            }
+            setRotating(true);
+        }
+
+        if (shoot) {
+            shoot();
+        }
+    }
+
     private void move() {
         double[] shift = getShift();
         double a = shift[0], b = shift[1];

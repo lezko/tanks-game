@@ -1,12 +1,12 @@
 package com.lezko.tanks.server;
 
+import com.lezko.simplejson.ArrObj;
 import com.lezko.tanks.game.Game;
 import com.lezko.tanks.game.GameObject;
-import com.lezko.tanks.net.UDPSender;
-import com.lezko.tanks.ui.GameObjectUpdateData;
+import com.lezko.tanks.game.Player;
+import com.lezko.tanks.ui.GameObjectEvent;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -14,40 +14,59 @@ import java.util.concurrent.CountDownLatch;
 
 public class GameSession implements Runnable {
 
+    public static class LimitExceedException extends RuntimeException {
+        public LimitExceedException() {
+            super("Game session limit exceed");
+        }
+    }
+
     private final int CLIENT_LIMIT = 5;
 
     private final UUID id = UUID.randomUUID();
-    private Game game;
-    private final Map<UUID, ClientHandler> clients = new HashMap<>();
+    private final Game game = new Game(800, 600);
+    private final Map<UUID, ClientHandler> clientHandlers = new HashMap<>();
+    private final Map<UUID, Player> clientPlayers = new HashMap<>(); // 1 - clientHandler id, 2 - game player id
 
     private final CountDownLatch latch = new CountDownLatch(1);
 
-    public UUID addClient(InetAddress address, int port) throws IOException, InterruptedException {
-        if (clients.size() == CLIENT_LIMIT) {
-            new UDPSender(address, port).send("Players limit exceed");
-            return null;
+    public synchronized UUID removeClient(UUID clientHandlerId) {
+        game.removePlayer(clientPlayers.get(clientHandlerId));
+        clientHandlers.remove(clientHandlerId);
+        clientPlayers.remove(clientHandlerId);
+        return clientHandlerId;
+    }
+
+    public void addClient(ClientHandler clientHandler) throws InterruptedException, LimitExceedException {
+        if (clientHandlers.size() == CLIENT_LIMIT) {
+            throw new LimitExceedException();
         }
 
         latch.await();
-        ClientHandler handler = new ClientHandler(game, address, port);
-        clients.put(handler.getId(), handler);
-        return handler.getId();
+
+        clientHandlers.put(clientHandler.getId(), clientHandler);
+        Player newPlayer = game.addPlayer();
+        clientPlayers.put(clientHandler.getId(), newPlayer);
     }
 
-    public void updatePlayer(UUID clientId, String data) {
-        clients.get(clientId).updateTank(data);
+    public void updatePlayer(UUID clientHandlerId, String data) {
+        synchronized (this) {
+            clientPlayers.get(clientHandlerId).getTank().update(data);
+        }
     }
 
     @Override
     public void run() {
-        game = new Game(800, 600);
         game.start();
         game.setCallback(() -> {
-            for (ClientHandler client : clients.values()) {
-                try {
-                    client.send(stringifyData());
-                } catch (IOException e) {
-                    e.printStackTrace();
+            synchronized (this) {
+                for (ClientHandler client : clientHandlers.values()) {
+                    try {
+                        if (client.UDPReady()) {
+                            client.sendUDP(stringifyData());
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         });
@@ -56,17 +75,17 @@ public class GameSession implements Runnable {
     }
 
     public int getPlayersCount() {
-        return clients.size();
+        return clientHandlers.size();
     }
 
     // todo optimize data collection
     private String stringifyData() {
-        StringBuilder s = new StringBuilder();
+        ArrObj arr = new ArrObj();
         for (GameObject o : game.getObjects()) {
-            s.append(GameObjectUpdateData.stringify(GameObjectUpdateData.fromGameObject(o))).append(" ");
+            arr.append(new GameObjectEvent(o).toString());
         }
 
-        return s.toString();
+        return arr.toString();
     }
 
     public UUID getId() {

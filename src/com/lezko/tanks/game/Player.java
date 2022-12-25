@@ -1,7 +1,5 @@
 package com.lezko.tanks.game;
 
-import com.lezko.tanks.game.Tank;
-
 public class Player {
 
     private Tank tank;

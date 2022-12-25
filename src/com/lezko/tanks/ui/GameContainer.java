@@ -12,7 +12,6 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.List;
 import java.util.Timer;
 
 public class GameContainer extends JPanel {
@@ -31,11 +30,11 @@ public class GameContainer extends JPanel {
     private final JLabel scoreLabel = new JLabel();
     private final JLabel timeLabel = new JLabel();
 
-    private final MyButton startButton = new MyButton("Start game");
-    private final MyButton pauseButton = new MyButton("Pause game");
-    private final MyButton resumeButton = new MyButton("Resume game");
-    private final MyButton restartButton = new MyButton("Restart game");
-    private final MyButton exitLobbyButton = new MyButton("Exit lobby");
+    private final MyButton startBtn = new MyButton("Start game");
+    private final MyButton pauseBtn = new MyButton("Pause game");
+    private final MyButton resumeBtn = new MyButton("Resume game");
+    private final MyButton restartBtn = new MyButton("Restart game");
+    private final MyButton exitLobbyBtn = new MyButton("Exit lobby");
 
     private final MyButton createLobbyBtn = new MyButton("Create lobby");
 
@@ -50,11 +49,21 @@ public class GameContainer extends JPanel {
             e.printStackTrace();
         }
 
+        setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+
         initField();
         client = new GameClient("localhost", 9999, dataList -> {
             field.update(dataList);
         });
 
+        initLobbyContainer();
+        add(new Box.Filler(new Dimension(0, 0), new Dimension(0, Short.MAX_VALUE), new Dimension(0, Short.MAX_VALUE)));
+        initButtons();
+
+        showLobbyList();
+    }
+
+    private void initButtons() {
         createLobbyBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -66,15 +75,22 @@ public class GameContainer extends JPanel {
                 }
             }
         });
-
-        setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-        initLobbyContainer();
-
-        add(new Box.Filler(new Dimension(0, 0), new Dimension(0, Short.MAX_VALUE), new Dimension(0, Short.MAX_VALUE)));
-
         createLobbyBtn.setAlignmentX(CENTER_ALIGNMENT);
         add(createLobbyBtn);
-        showLobbyList();
+
+        exitLobbyBtn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                try {
+                    exitSession();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+        exitLobbyBtn.setAlignmentX(CENTER_ALIGNMENT);
+        exitLobbyBtn.setVisible(false);
+        add(exitLobbyBtn);
     }
 
     private void showLobbyList() throws IOException {
@@ -97,7 +113,21 @@ public class GameContainer extends JPanel {
     private void joinSession(UUID sessionId) throws IOException {
         lobbyContainer.setVisible(false);
         client.joinSession(sessionId);
-        startGame();
+
+        field.setVisible(true);
+        createLobbyBtn.setVisible(false);
+        exitLobbyBtn.setVisible(true);
+        startGameTimer();
+    }
+
+    private void exitSession() throws IOException {
+        lobbyContainer.setVisible(true);
+        client.exitSession();
+
+        field.setVisible(false);
+        createLobbyBtn.setVisible(true);
+        exitLobbyBtn.setVisible(false);
+        stopGameTimer();
     }
 
     private void initLobbyContainer() {
@@ -115,13 +145,7 @@ public class GameContainer extends JPanel {
         add(field);
     }
 
-    private void startGame() {
-        client.startListening();
-        field.setVisible(true);
-        initGameTimer();
-    }
-
-    private void initGameTimer() {
+    private void startGameTimer() {
         timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
@@ -133,6 +157,11 @@ public class GameContainer extends JPanel {
                 }
             }
         }, 0, 10);
+    }
+
+    private void stopGameTimer() {
+        timer.cancel();
+        timer.purge();
     }
 
     public void paintComponent(Graphics g) {

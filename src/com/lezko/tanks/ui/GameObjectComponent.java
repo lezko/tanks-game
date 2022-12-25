@@ -1,9 +1,6 @@
 package com.lezko.tanks.ui;
 
-import com.lezko.tanks.game.GameObject;
-
 import javax.swing.*;
-import java.awt.*;
 
 public class GameObjectComponent extends JComponent {
 
@@ -13,10 +10,10 @@ public class GameObjectComponent extends JComponent {
     public GameObjectComponent(int size) {
         this.size = size;
     }
-    public void update(GameObjectUpdateData data) {
-        x = (int) data.getX();
-        y = (int) data.getY();
-        angle = data.getAngle();
+    public void update(GameObjectEvent data) {
+        x = (int) data.x;
+        y = (int) data.y;
+        angle = data.angle;
 
         setBounds(x, y, size, size);
     }

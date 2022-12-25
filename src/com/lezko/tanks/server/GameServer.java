@@ -1,55 +1,63 @@
 package com.lezko.tanks.server;
 
+import com.lezko.simplejson.MapObj;
+import com.lezko.simplejson.Obj;
 import com.lezko.tanks.net.UDPReceiver;
 import com.lezko.tanks.net.UDPSender;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.*;
 
 public class GameServer {
 
-    private final int SESSION_LIMIT = 5;
+    public static final int SESSION_LIMIT = 5;
 
-    private UDPReceiver receiver;
+    private final UDPReceiver receiver;
+    private final ServerSocket serverSocket;
     private final Map<UUID, GameSession> sessions = new HashMap<>();
+    private final Map<UUID, ClientHandler> clients = new HashMap<>();
 
     public GameServer() throws IOException {
         receiver = new UDPReceiver(9999);
+        serverSocket = new ServerSocket(8888);
 
         System.out.println("[Server] Waiting for clients to connect...");
+
+        new Thread(() -> {
+            try {
+                while (true) {
+                    Socket clientSocket = serverSocket.accept();
+                    System.out.println("[Server] Client connected");
+
+                    ClientHandler newClient = new ClientHandler(clientSocket, sessions);
+                    clients.put(newClient.getId(), newClient);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+
         try {
             while (true) {
                 // todo make handlers for each request
-                String response = receiver.getLine();
-                String[] arr = response.split(" ");
-
-                if (response.startsWith("sessions")) {
-                    StringBuilder sb = new StringBuilder();
-                    for (GameSession session : sessions.values()) {
-                        sb.append(session.getId()).append(" ").append(session.getPlayersCount()).append("|");
+                Obj req = Obj.fromString(receiver.getLine());
+                System.out.println(req);
+                switch (req.get("type").val()) {
+                    case "controls" -> {
+                        UUID sessionId = UUID.fromString(req.get("session_id").val());
+                        UUID clientId = UUID.fromString(req.get("client_id").val());
+                        String state = req.get("state").val();
+                        sessions.get(sessionId).updatePlayer(clientId, state);
                     }
-                    new UDPSender(receiver.getAddress(), receiver.getPort()).send(sb.toString());
-                } else if (response.startsWith("controls")) {
-                    UUID sessionId = UUID.fromString(arr[1]);
-                    UUID clientId = UUID.fromString(arr[2]);
-                    sessions.get(sessionId).updatePlayer(clientId, arr[3]);
-                } else if (response.startsWith("join")) {
-                    UUID sessionId = UUID.fromString(arr[1]);
-                    UUID newClientId = sessions.get(sessionId).addClient(receiver.getAddress(), receiver.getPort());
-                    new UDPSender(receiver.getAddress(), receiver.getPort()).send(newClientId.toString());
-                } else if (response.startsWith("create")) {
-                    UDPSender sender = new UDPSender(receiver.getAddress(), receiver.getPort());
-                    if (sessions.size() == SESSION_LIMIT) {
-                        sender.send("Sessions limit exceed");
-                    } else {
-                        GameSession newSession = new GameSession();
-                        sessions.put(newSession.getId(), newSession);
-                        new Thread(newSession).start();
-
-                        sender.send(newSession.getId().toString());
-                        System.out.println("created session " + newSession.getId());
+                    case "hello_udp" -> {
+                        UUID id = UUID.fromString(req.get("client_id").val());
+                        ClientHandler clientHandler = clients.get(id);
+                        clientHandler.setSender(new UDPSender(receiver.getAddress(), receiver.getPort()));
+                        synchronized (clientHandler) {
+                            clientHandler.notifyAll();
+                        }
                     }
                 }
             }

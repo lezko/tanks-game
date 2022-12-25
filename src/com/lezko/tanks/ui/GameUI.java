@@ -2,6 +2,7 @@ package com.lezko.tanks.ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
 import java.io.IOException;
 
 public class GameUI extends JFrame {
@@ -17,7 +18,6 @@ public class GameUI extends JFrame {
 
         add(gameContainer);
         pack();
-
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setVisible(true);

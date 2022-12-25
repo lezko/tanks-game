@@ -1,7 +1,5 @@
 package com.lezko.tanks.ui;
 
-import com.lezko.tanks.game.GameObject;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.*;
@@ -30,14 +28,14 @@ public class Field extends JPanel {
         gameObjectComponents.clear();
     }
 
-    public void update(List<GameObjectUpdateData> dataList) {
+    public void update(List<GameObjectEvent> dataList) {
         if (dataList == null) {
             return;
         }
 
         Set<UUID> ids = new HashSet<>();
-        for (GameObjectUpdateData data : dataList) {
-            UUID id = data.getId();
+        for (GameObjectEvent data : dataList) {
+            UUID id = data.id;
             ids.add(id);
 
             if (gameObjectComponents.containsKey(id)) {
@@ -46,15 +44,15 @@ public class Field extends JPanel {
             } else {
                 GameObjectComponent component = null;
 
-                switch (data.getType()) {
+                switch (data.type) {
                     case AMMO:
-                        component = new AmmoComponent(data.getSize());
+                        component = new AmmoComponent(data.size);
                         break;
                     case TANK:
-                        component = new TankComponent(data.getSize());
+                        component = new TankComponent(data.size);
                         break;
                     case TARGET:
-                        component = new TargetComponent(data.getSize());
+                        component = new TargetComponent(data.size);
                         break;
                 }
 
